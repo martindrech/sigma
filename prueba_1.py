@@ -9,44 +9,54 @@ from __future__ import division
 import numpy as np
 import pylab as plt
 import sigma as si
+#import fourier as f
 
-def deriv(x, t):
-    dt = t[1]-t[0]
-    dx = np.diff(x)/dt
-    dx = np.append([dx[0]], dx)
-    return dx
-
-c = np.loadtxt('0.85_0.1_10.txt', np.complex)
+c = np.loadtxt('0.75_0.24_20.txt', np.complex)
 #c = np.loadtxt('.txt', np.complex)
 nu = c[0]
 c = c[1:]
-i = 1
+i = 2
 c = c[c.size//2-i:c.size//2+i+1]
-
-t = np.linspace(0, 10, 100)
-
+e = -0.24
+t = np.linspace(0,10, 30)
+T1, T2, T3, T4 = .1, 1, 5, 10
 wc = 50
-g = 2*np.sqrt(1-0.85)
+g = 1
+#
+#d = np.array([1])
+#s0e = si.sigma_baja(t, d, nu, g, wc, 0)
+#s1e = si.sigma_num(t, d, nu, g, wc, 0, T1)
+#s2e = si.sigma_num(t, d, nu, g, wc, 0, T2)
+#s3e = si.sigma_num(t, d, nu, g, wc, 0, T3)
+#s4e = si.sigma_num(t, d, nu, g, wc, 0, T4)
+#
+#print 'e'
+#
+#s0 = si.sigma_baja(t, c, nu, g, wc, e)
+#s1 = si.sigma_num(t, c, nu, g, wc, e, T1)
+#s2 = si.sigma_num(t, c, nu, g, wc, e, T2)
+#s3 = si.sigma_num(t, c, nu, g, wc, e, T3)
+#s4 = si.sigma_num(t, c, nu, g, wc, e, T4)
 
-sxx_baja = si.sigma_baja(t, c, nu, g, wc)
-sxx_baja_est = si.sigma_baja(t, np.array([1]), nu, g, wc)
-
-sxp = deriv(sxx_baja, t)
-sxp_dt = deriv(sxp, t)
-
-
-
-spp = (1+2*np.cos(2*t))*sxx_baja-si.S_pp_baja(t, c, nu, g, wc)+sxp_dt+g*sxp
-
-spp = np.real(spp)
-spp_est = sxx_baja_est-si.S_pp_baja(t, np.array([1]), nu, g, wc)
+#plt.clf()
+#plt.plot(t, s0[1], linewidth = 2, label = 'T=0')
+#plt.plot(t, s1[1], linewidth = 2, label = 'T=0.1')
+#plt.plot(t, s2[1], linewidth = 2, label = 'T=1')
+#plt.plot(t, s3[1], linewidth = 2, label = 'T=5')
+#plt.plot(t, s4[1], linewidth = 2, label = 'T=10')
+#plt.xlabel('t', fontsize = 30), plt.ylabel('$\sigma_{pp}$', fontsize = 30)
+#plt.legend(), plt.subplots_adjust(bottom=0.22)
 
 plt.clf()
-plt.plot(t, np.real(sxx_baja), 'b', t, np.real(sxp), 'r',t, np.real(spp), 'g' )
-plt.plot(t, np.real(sxx_baja_est), 'b', t, np.real(spp_est), 'g') 
+plt.plot(t, s2[0], 'b', linewidth = 2, label = '$\sigma_{xx}$')
+plt.plot(t, s2e[0], 'b', linewidth = 2)
+plt.plot(t, s2[1], 'r', linewidth = 2, label = '$\sigma_{pp}$')
+plt.plot(t, s2e[1], 'r', linewidth = 2)
+plt.plot(t, s2[2], 'g',linewidth = 2, label = '$\sigma_{xp}$')
+plt.plot(t, s2e[2], 'g', linewidth = 2)
+plt.legend(), plt.subplots_adjust(bottom=0.22)
+plt.xlabel('t'), plt.title('T = 1')
 
 
 
-
-plt.show()
 print 'done'
