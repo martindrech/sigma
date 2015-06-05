@@ -9,7 +9,7 @@ Created on Fri Dec 19 18:30:23 2014
 from __future__ import division
 import numpy as np
 from scipy.integrate import quad
-from R_bajaT import R as int_baja
+from erres import R3_bajaT as int_baja
 
 '''
 y''+(a-2q cos(2t))y = 0
@@ -218,7 +218,7 @@ def sigma_baja(t, c, nu, g, wc, e):
                 for l_i, l in enumerate(enes):
                     print n_i, m_i, k_i, l_i
 
-                    r = c[n_i]*c[m_i]*np.conj(c[k_i]*c[l_i])*(int_baja(wc, t, n, m, k, l, g, nu)-int_baja(0, t, n, m, k, l, g, nu))
+                    r = c[n_i]*c[m_i]*np.conj(c[k_i]*c[l_i])*(int_baja(wc, t, n, m, k, l, g, nu, nu)-int_baja(0, t, n, m, k, l, g, nu, nu))
                     suma = suma + r
                     
     sxx = suma * (np.abs(B(c,nu))**2 * g / np.pi)

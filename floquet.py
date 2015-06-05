@@ -119,22 +119,22 @@ def mathieu_coefs(a, q, nu, N):
 #a_max, q_max, nro_a, nro_q = 10, 10, 10, 10
 #mathieu_est(a_max, q_max, nro_a, nro_q)
 
-c_sci = np.loadtxt('3_-.5_10.txt', np.complex)
-nu_sci = c_sci[0]
-c_sci = c_sci[1:]
-
-a, q, N = 3, -.5, 37
-t = np.linspace(0, np.pi, 1000)
-nu= mathieu_nu(a, q, N)
-c = mathieu_coefs(a, q, nu, N)
-te = np.linspace(0, 20, 100)
-plt.clf()
-phi1_mio = si.phi1(te, c, nu)
-phi1_sci = si.phi1(te, c_sci, nu_sci)
-phi1_num = mathieu(a, q, te)[0]
-
-plt.plot(te, phi1_num.real, 'r-')
-plt.plot(te, phi1_mio.real, 'o')
+#c_sci = np.loadtxt('3_-.5_10.txt', np.complex)
+#nu_sci = c_sci[0]
+#c_sci = c_sci[1:]
+#
+#a, q, N = 3, -.5, 37
+#t = np.linspace(0, np.pi, 1000)
+#nu= mathieu_nu(a, q, N)
+#c = mathieu_coefs(a, q, nu, N)
+#te = np.linspace(0, 20, 100)
+#plt.clf()
+#phi1_mio = si.phi1(te, c, nu)
+#phi1_sci = si.phi1(te, c_sci, nu_sci)
+#phi1_num = mathieu(a, q, te)[0]
+#
+#plt.plot(te, phi1_num.real, 'r-')
+#plt.plot(te, phi1_mio.real, 'o')
 
 """
 for N in np.arange(1, 100, 5):
@@ -156,4 +156,4 @@ for N in np.arange(1, 100, 5):
 
 
 
-print 'done'
+#print 'done'
