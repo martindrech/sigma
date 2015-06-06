@@ -15,7 +15,7 @@ from time import time
 from R_bajaT_nueva import R as int_baja
 from R_bajaT_nueva import R_alta as int_alta 
 from erres import *
-
+from R_bajaT import R
 
 
 def aij(t, i, j):
@@ -93,17 +93,18 @@ def sigma(t):
 
 def sigma_baja_nuevo(t, c, nu, g, wc):
     """
-    Devuelve, para T=0 las dispersiones sxx, spp, sxp
+    Devuelve, para T=0 la dispersion sxx
     """
     enes = np.linspace(-(len(c)-1)/2, (len(c)-1)/2, len(c))
     N,M,K,L, T = np.meshgrid(enes, enes, enes, enes, t)
     
     A1, A2, A3, A4, Ta = np.meshgrid(c, c, np.conjugate(c), np.conjugate(c), t)
     A = A1*A2*A3*A4
+    nu2 = np.conjugate(nu)
     r =A*(R3_bajaT(wc, T, N, M, K, L, g, nu, nu)-R3_bajaT(0, T, N, M, K, L, g, nu, nu))
-    sxx = np.sum(r, axis = (0,1,2,3)) *(si.B(c,nu)**2 * g / np.pi)
+    sxx = np.sum(r, axis = (0,1,2,3)) *(si.B(c,nu)**2  * g / np.pi)
    
-    return sxx.real
+    return np.real(sxx)
 
 #def sigma_alta_nuevo(t, c, nu, g, wc):
 #    """
@@ -142,24 +143,25 @@ def sigma_baja_nuevo(t, c, nu, g, wc):
 #print 'new time: ', end1-beg1
 #print 'old time: ', end2-beg2
 #    
-t = np.linspace(0, 10, 1000)
+t = np.linspace(0, 10, 100)
 plt.clf()
-c = np.loadtxt('0.75_-0.5.txt', np.complex)
+c_sci = np.loadtxt('0.75_-0.5.txt', np.complex)
+nu_sci = c_sci[0]
 
-nu = c[0]
 c = c[1:]
-i = 3
+i = 2
 c = c[c.size//2-i:c.size//2+i+1]
-a, q = .75, -.5
-g = .1
+a, q = .75, 1
+g = 1
 wc = 50
 nu = fl.mathieu_nu(a, q, 15)
 c = fl.mathieu_coefs(a, q, nu, 11)
 
+c = c[c.size//2-i:c.size//2+i+1]
 #old, cha, cha = si.sigma_baja(t, c, nu, g,  wc, 0)
 new = sigma_baja_nuevo(t, c, nu, g, wc)
 #plt.plot(t, old)
-plt.plot(t, new, '-g')
+plt.plot(t, new, 'og')
 
 #for wc in [50]:
 #    s = sigma_alta_nuevo(t, ci, nu, g, wc)

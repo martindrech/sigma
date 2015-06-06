@@ -11,6 +11,7 @@ import numpy as np
 from scipy.integrate import quad
 from erres import R3_bajaT as int_baja
 
+
 '''
 y''+(a-2q cos(2t))y = 0
 nu es el exp de floquet, c el vector con la expansion de fourier de p(t)

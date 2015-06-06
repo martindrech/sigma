@@ -9,11 +9,8 @@ from __future__ import division
 from scipy.integrate import odeint
 import numpy as np
 import pylab as plt
-import sigma as si
-from scipy.linalg import eig, eigh, logm
-import scipy
-from scipy import linalg, matrix
-import timeit
+from scipy.linalg import eig,logm
+
 ###############################################################################
 
 
@@ -76,12 +73,12 @@ def mathieu_nu(a, q, N):
     Devuelve nu para los parametros a y q. 
     """
     T = np.pi
-    n = 1000
+    n = 10000
     t = np.linspace(0, T, n)
     phi1, dphi1, phi2, dphi2 = mathieu(a, q, t)
     C = np.array([[phi2[n-1], phi1[n-1]], [dphi2[n-1], dphi1[n-1]]])
     B = -1j/T * logm(C)
-    nu =  eig(B)[0][0] 
+    nu =  eig(B)[0][1] 
    
     
     return nu
@@ -116,44 +113,8 @@ def mathieu_coefs(a, q, nu, N):
 
     
 ###############################################################################
-#a_max, q_max, nro_a, nro_q = 10, 10, 10, 10
-#mathieu_est(a_max, q_max, nro_a, nro_q)
 
-#c_sci = np.loadtxt('3_-.5_10.txt', np.complex)
-#nu_sci = c_sci[0]
-#c_sci = c_sci[1:]
-#
-#a, q, N = 3, -.5, 37
-#t = np.linspace(0, np.pi, 1000)
-#nu= mathieu_nu(a, q, N)
-#c = mathieu_coefs(a, q, nu, N)
-#te = np.linspace(0, 20, 100)
-#plt.clf()
-#phi1_mio = si.phi1(te, c, nu)
-#phi1_sci = si.phi1(te, c_sci, nu_sci)
-#phi1_num = mathieu(a, q, te)[0]
-#
-#plt.plot(te, phi1_num.real, 'r-')
-#plt.plot(te, phi1_mio.real, 'o')
+#nu = mathieu_nu(5, 2, 11)
+#print nu
 
-"""
-for N in np.arange(1, 100, 5):
-    start = timeit.timeit()
-    c = mathieu_coefs(a, q, nu, N)
-    end = timeit.timeit()
-    print "N: ", N , 'time: ', start-end
-"""
-
-#print 'done'
-#a, q, N = .75, -.5, 11
-#nu= mathieu_nu(a, q, N)
-#
-#for z, i in enumerate(np.arange(11, 80, 2)):
-#    
-#    c = mathieu_coefs(a, q, nu, i) 
-#    c = c[:len(c)-2]
-#    print i, np.argmax(np.abs(c))
-
-
-
-#print 'done'
+print 'done'
