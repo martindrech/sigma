@@ -51,6 +51,17 @@ def B(c, nu):
     p0 = P[0]
 #    print p0
     return 1j/( p0 * (dp+nu*p0*1j))
+
+def C(c, nu):
+    """
+    Devuelve el coef C que aparece en las phi
+    """
+    t = np.array([0, 0.00001])
+    P = p(t, c)
+    dp = (P[1]-P[0])/(t[1]-t[0])
+    p0 = P[0]
+#    print p0
+    return 1j/( dp+nu*p0*1j )
     
 def y1(t, c, nu):
     """

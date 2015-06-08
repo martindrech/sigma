@@ -68,7 +68,7 @@ def mathieu_est(a_max, q_max, nro_a, nro_q):
             plt.ylabel('q')
     return A
 
-def mathieu_nu(a, q, N):
+def mathieu_nu(a, q, N=19):
     """
     Devuelve nu para los parametros a y q. 
     """
@@ -96,7 +96,7 @@ def H_nu(q, nu, N):
         
     return H
 
-def mathieu_coefs(a, q, nu, N):
+def mathieu_coefs(a, q, nu, N=11):
     """
     Devuelve un vector c, con los coeficientes del desarrollo periodico de p(t).
 
@@ -117,4 +117,4 @@ def mathieu_coefs(a, q, nu, N):
 #nu = mathieu_nu(5, 2, 11)
 #print nu
 
-print 'done'
+#print 'done'

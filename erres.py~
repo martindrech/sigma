@@ -1,0 +1,69 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jun  2 13:34:19 2015
+
+@author: martin
+"""
+
+from __future__ import division
+import numpy as np
+
+def R1_bajaT(w, t, n, k, g, nu1, nu2):
+    """
+    R1_bajaT
+    """
+    u, v = nu1.real, nu1.imag
+    x, y = nu2.real, nu2.imag
+    ret = 
+    return ret
+    
+def R2_bajaT(w, t, n, m, k, g, nu1, nu2):
+    """
+    R2_bajaT
+    """
+    u, v = nu1.real, nu1.imag
+    x, y = nu2.real, nu2.imag
+    ret = 
+    return ret
+
+
+def R3_bajaT(w, t, n, m, k, l, g, nu1, nu2):
+    """
+    R3_bajaT
+    """
+    u, v = nu1.real, nu1.imag
+    x, y = nu2.real, nu2.imag
+
+    re = 
+    return re 
+    
+def R1_altaT(w, t, n, k, g, nu1, nu2, temp):
+    """
+    R1_altaT
+    """
+    u, v = nu1.real, nu1.imag
+    x, y = nu2.real, nu2.imag
+    ret = 
+    return ret
+    
+def R2_altaT(w, t, n, m, k, g, nu1, nu2, temp):
+    """
+    R2_altaT
+    """
+    u, v = nu1.real, nu1.imag
+    x, y = nu2.real, nu2.imag
+    ret = 
+    return ret
+
+
+def R3_altaT(w, t, n, m, k, l, g, nu1, nu2, temp):
+    """
+    R3_altaT
+    """
+    u, v = nu1.real, nu1.imag
+    x, y = nu2.real, nu2.imag
+    re = 
+    return re 
+    
+
+

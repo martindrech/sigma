@@ -20,12 +20,13 @@ def sigma_baja_nuevo(t, c, nu, g, wc):
     enes = np.linspace(-(len(c)-1)/2, (len(c)-1)/2, len(c))
     N,M,K,L, T = np.meshgrid(enes, enes, enes, enes, t)
     
-    A1, A2, A3, A4, Ta = np.meshgrid(c, c, np.conjugate(c), np.conjugate(c), t)
+    A1, A2, A3, A4, Ta = np.meshgrid(c, c, c,c, t)
     A = A1*A2*A3*A4
-    nu1 = np.conjugate(nu)
+#    nu1 = np.conjugate(nu)
+    nu1 = nu
     r =A*(R(wc, T, N, M, K, L, g, nu, nu1)-R(0, T, N, M, K, L, g, nu, nu1))
     
-    sxx = np.sum(r, axis = (0,1,2,3)) *(np.abs(si.B(c,nu))**2 * g / np.pi)
+    sxx = np.sum(r, axis = (0,1,2,3)) *(si.B(c,nu)**2 * g / np.pi)
    
     return sxx.real
 
@@ -35,7 +36,7 @@ c_sci = np.loadtxt('5_1.txt', np.complex)
 nu_sci = c_sci[0]
 c_sci = c_sci[1:]
 
-a, q = 5, 1
+a, q = .75, -5
 nu = fl.mathieu_nu(a, q, 15)
 c = fl.mathieu_coefs(a, q, nu, 11)
 
