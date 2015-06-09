@@ -66,7 +66,7 @@ def a3(t, g,  nu1, c1, temp1, nu2, c2, temp2, wc):
     w1w1mt2 =w_w.w1_w1(t, g, temp2, nu1, c1, nu2 , c2, wc)
     
     a11 = w1w1t1+w1mw1mt1+2*w1w1mt1+w1w1t2+w1mw1mt2-2*w1w1mt2
-    a12 = w1w1t1-w1mw1mt1+w1w1t2-w1mw1mt2
+    a12 = w1w1t1+w1w1mt1-2*w1w1mt1+w1w1t2+w1w1mt2-2*w1w1mt2
     a21 = a12
     a22 = w1w1t2+w1mw1mt2+2*w1w1mt2+w1w1t1+w1mw1mt1-2*w1w1mt1
     
@@ -97,21 +97,60 @@ def b(t, g, a1, q1, a2, q2):
     b4 = -1/2 * np.array([[b4_11, b4_12], [b4_12, b4_11]])
     
     return b1, b2, b3, b4
+    
+def cov(t, g, ca1, cq1, ca2, cq2, temp1, temp2, wc = 50, i = 3):
+    """
+    Devuelve <x1^2>, <x1^2>. 
+    """    
+    nu1, nu2 = fl.mathieu_nu(ca1, cq1), fl.mathieu_nu(ca2, cq2)
+    c1, c2 = fl.mathieu_coefs(ca1, cq1, nu1), fl.mathieu_coefs(ca2, cq2, nu2)
+    c1, c2 = c1[c1.size//2-i:c1.size//2+i+1], c2[c2.size//2-i:c2.size//2+i+1]
+    
+    Ma1 = a1(t, g,  nu1, c1, temp1, nu2, c2, temp2, wc)
+    Ma2 = a2(t, g,  nu1, c1, temp1, nu2, c2, temp2, wc)
+    Ma3 = a3(t, g,  nu1, c1, temp1, nu2, c2, temp2, wc)
+    Mb1, Mb2, Mb3, Mb4 = b(t, g, ca1, cq1, ca2, cq2)
+    
+    det = Mb3[0][0]**2-Mb3[0][1]**2
+    
+    x1x1 = (1 / det**2) * ( Mb3[0][0]**2 * Ma3[0][0] -Mb3[0][0]*Mb3[0][1]*(Ma3[1][0]+Ma3[0][1]) +Mb3[1][0]**2 * Ma3[1][1] ) 
+    x2x2 = (1 / det**2) * ( Mb3[0][1]**2 * Ma3[0][0] -Mb3[0][0]*Mb3[0][1]*(Ma3[1][0]+Ma3[0][1]) +Mb3[0][0]**2 * Ma3[1][1] ) 
+
+    x1x2 = (1/ (2*det) ) * (1/2 * (Ma3[0][1]+Ma3[1][0]) - (Mb3[0][1]/Mb3[0][0]) * Ma3[1][1]) - (Mb3[0][1]/Mb3[0][0]) * x2x2
+    
+    
+    x1p1 = (1/ (2*det) ) * (Mb3[1][0]*Ma2[0][1]-Mb3[0][0]*Ma2[0][0]) + Mb1[0][1] * x1x2 + Mb1[0][0]*x1x1   
+    x2p2 = (1/ (2*det) ) * (Mb3[0][1]*Ma2[1][0]-Mb3[0][0]*Ma2[1][1]) + Mb1[0][1] * x1x2 + Mb1[0][0]*x2x2
+    
+    x1p2 = (1/ (2*det) ) * (Mb3[1][0]*Ma2[0][0]-Mb3[0][0]*Ma2[1][0]) + Mb1[0][1] * x1x1 + Mb1[0][0]*x1x2  
+    x2p1 = (1/ (2*det) ) * (Mb3[0][1]*Ma2[0][0]-Mb3[0][0]*Ma2[0][1]) + Mb1[0][0] * x2x2 + Mb1[0][1]*x1x2
+    
+    p1p1 = Ma1[0][0] + Mb1[0][0]**2 * x1x1 + Mb1[0][1]**2 * x2x2 + 4*Mb1[0][0]*Mb1[0][1]*x1x2 + 2*Mb1[0][0] * x1p1 + 2*Mb1[0][1]*x2p1
+    p2p2 = Ma1[1][1] + Mb1[1][0]**2 * x1x1 + Mb1[0][0]**2 * x2x2 + 4*Mb1[0][0]*Mb1[0][1]*x1x2 + 2*Mb1[0][0] * x2p2 + 2*Mb1[0][1]*x1p2
+    
+    p1p2 = 1/2 * (Ma1[0][1]+Ma1[1][0]) + 3*Mb1[0][0]*Mb1[0][1]* (x1x1+x2x2)+3*(Mb1[1][0]*Mb1[0][1]+Mb1[0][0]*Mb1[1][1])*x1x2
+    
+    plt.plot(t, Ma2[0][0])
+    return x1x1, x2x2, x1x2, x1p1, x2p2, x1p2, x2p1, p1p1, p2p2, p1p2
+
+
+
+    
 start = time.time()  
-a, q, g = .75, .5, 1
-nu = fl.mathieu_nu(a, q)
-A = fl.mathieu_coefs(a, q, nu, 11)
+ca1, cq1, g = .75, .5, 1
+ca2, cq2 = .75, .5
+nu1, nu2 = fl.mathieu_nu(ca1, cq1), fl.mathieu_nu(ca2, cq2)
+A1, A2 = fl.mathieu_coefs(ca1, cq1, nu1, 11), fl.mathieu_coefs(ca2, cq2, nu2, 11)
 i = 3
-A = A[A.size//2-i:A.size//2+i+1]
-t = np.linspace(0,10, 50)
-#s1 = a1(t, 1, nu, A, 0, nu, A, 0, 50)
-#s2 = a2(t, 1, nu, A, 0, nu, A, 0, 50)
-s3 = a3(t, 1, nu, A, 0, nu, A, 0, 50)
-b1, b2, b3, b4 = b(t, g, a, q, a, q)
+A1, A2 = A1[A1.size//2-i:A1.size//2+i+1], A2[A2.size//2-i:A2.size//2+i+1]
+t = np.linspace(5,15, 100)
+
 plt.clf()
-sxx =  ( 1/ (b3[0][0]**2) )**2 * b3[1][1]**2 * s3[0][0]
-plt.plot(t, sxx)
+T1, T2 = 10, 10
+x1x1, x2x2,x1x2, x1p1, x2p2, x1p2, x2p1, p1p1, p2p2, p1p2 = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, 50, i)
+#plt.plot(t, x1x1, 'b-')
+#plt.plot(t, x1x2, 'ro')
 end = time.time()
 print -start+end
-
+#
 print 'done'
