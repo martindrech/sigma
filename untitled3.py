@@ -10,32 +10,48 @@ import numpy as np
 import sigma as si
 import pylab as plt
 
-#c = np.loadtxt('hanggi.txt', np.complex)
-c = np.loadtxt('0.85_0.1_10.txt', np.complex)
-
-nu = c[0]
-c = c[1:]
-i = 0
-#c = c[c.size//2-i:c.size//2+i+1]
 
 
-def G_fou(s, t, nu, c):
+def z(t, w, g, c, nu):
+    def integr(s):
+        return si.G(t, s, c, nu) * np.exp(g*s/2+1j*w*s)
+    ret = si.complex_int(integr, 0, t)
+    return ret
+
+def zp(t, w, g, c, nu):
+    def integr(s):
+        return si.G(t, s, c, nu) * np.exp(g*s/2-1j*w*s)
+    ret = si.complex_int(integr, 0, t)
+    return ret
     
-     
-    enes = np.linspace(-(len(c)-1)/2, (len(c)-1)/2, len(c)) 
-    suma = np.array(np.zeros(len(s)))
-    for n_i, n in enumerate(enes):
-        for m_i, m in enumerate(enes):
-            bn, bm = 2*n + nu, 2*m + nu 
-            r = c[n_i]*c[m_i]*np.sin(bn*t-bm*s)
-            suma = suma + r
-    return si.B(c, nu, s) * suma
+def w1w1(t, wc, g, c1, nu1, c2, nu2):
+    ret = np.zeros(len(t)) + 0 * 1j
+    for i, ti in enumerate(t):
+        print ti
+        def integr(w):
+            return w*np.real(z(ti, w, g, c1, nu1) * z(ti, w, g, c2, nu2))
+        int_ti = si.complex_int(integr, 0, wc)
+        ret[i] = int_ti
+    return ret
 
-t = np.linspace(0,1)
-a = si.phi1(t, c, nu)
-b = si.phi2(t, c, nu)
-n = 5
-G = -a*b[n]+b*a[n]
+import floquet as fl
+import w_w as wes
+ca1, cq1 = .7, .5
+nu1 = fl.mathieu_nu(ca1, cq1)
+g = 1
+ca2, cq2 = .8, .5
+nu2 = fl.mathieu_nu(ca2, cq2)
+A1, A2 = fl.mathieu_coefs(ca1, cq1, nu1, 11), fl.mathieu_coefs(ca2, cq2, nu2, 11)
+i = 2
+A1, A2 = A1[A1.size//2-i:A1.size//2+i+1], A2[A2.size//2-i:A2.size//2+i+1]
+wc = 50
+t = np.linspace(0,10, 30)
+phi1, dphi1, phi2, dphi2 = fl.mathieu(ca1, cq1, t)    
+phim1, dphim1, phim2, dphim2 = fl.mathieu(ca2, cq2, t)
 
-plt.clf()
-plt.plot(t, G, 'b', t, G_fou(t, t[n], nu, c), 'or')
+
+int_mia = wes.w1_w1(t, g, 0, nu1, A1, nu2, A2, wc, phi1, phim1)
+int_num = w1w1(t, wc, g, A1, nu1, A2, nu2) 
+
+plt.plot(t, int_mia, 'b')
+plt.plot(t, int_num, 'g')

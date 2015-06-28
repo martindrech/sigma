@@ -96,7 +96,7 @@ def H_nu(q, nu, N):
         
     return H
 
-def mathieu_coefs(a, q, nu, N=11):
+def mathieu_coefs(a, q, nu, N=21):
     """
     Devuelve un vector c, con los coeficientes del desarrollo periodico de p(t).
 
@@ -113,8 +113,29 @@ def mathieu_coefs(a, q, nu, N=11):
 
     
 ###############################################################################
-
-#nu = mathieu_nu(5, 2, 11)
-#print nu
-
+#import sigma as si
+#def impedir_peq(arr, eps):
+#    mascara = np.abs(arr) < eps
+#    arr[mascara] = eps*np.sign(arr[mascara])
+#    
+#ca1, cq1, g = 1.2, .5, .1
+#ca2, cq2 = 2, .5
+#nu1, nu2 = mathieu_nu(ca1, cq1), mathieu_nu(ca2, cq2)
+#A1, A2 = mathieu_coefs(ca1, cq1, nu1, 11), mathieu_coefs(ca2, cq2, nu2, 11)
+#i = 3
+#A1, A2 = A1[A1.size//2-i:A1.size//2+i+1], A2[A2.size//2-i:A2.size//2+i+1]
+#t = np.linspace(0, 10, 1000)
+##
+#phi1, dphi1, phi2, dphi2 = mathieu(ca1, cq1, t)
+#phim1, dphim1, phim2, dphim2 = mathieu(ca2, cq2, t)
+##impedir_peq(phi1, 0.1), impedir_peq(phim1, 0.1)
+#plt.clf()
+#asco = (phi1+phim1)
+#impedir_peq(asco, 0.1)
+#plt.plot(t, (phi1-phim1)/asco, 'o-')
+#plt.plot(t, phi1, 'g')
+#plt.plot(t, phim1, 'r')
+#plt.grid()
+#
 #print 'done'
+#print nu1

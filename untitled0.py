@@ -10,48 +10,18 @@ import numpy as np
 import pylab as plt
 import sigma as si
 import floquet as fl
-from erres import R3_bajaT as R
+import erres as R
 
-
-def sigma_baja_nuevo(t, c, nu, g, wc):
-    """
-    Devuelve, para T=0 las dispersiones sxx, spp, sxp
-    """
-    enes = np.linspace(-(len(c)-1)/2, (len(c)-1)/2, len(c))
-    N,M,K,L, T = np.meshgrid(enes, enes, enes, enes, t)
-    
-    A1, A2, A3, A4, Ta = np.meshgrid(c, c, c,c, t)
-    A = A1*A2*A3*A4
-#    nu1 = np.conjugate(nu)
-    nu1 = nu
-    r =A*(R(wc, T, N, M, K, L, g, nu, nu1)-R(0, T, N, M, K, L, g, nu, nu1))
-    
-    sxx = np.sum(r, axis = (0,1,2,3)) *(si.B(c,nu)**2 * g / np.pi)
-   
-    return sxx.real
-
-c_sci = np.loadtxt('0.75_-0.5.txt', np.complex)
-c_sci = np.loadtxt('5_1.txt', np.complex)
-
-nu_sci = c_sci[0]
-c_sci = c_sci[1:]
-
-a, q = .75, -5
-nu = fl.mathieu_nu(a, q, 15)
-c = fl.mathieu_coefs(a, q, nu, 11)
-
-i = 3
-c, c_sci = c[c.size//2-i:c.size//2+i+1], c_sci[c_sci.size//2-i:c_sci.size//2+i+1]
-
+t = np.linspace(0, 30, 1000)
+a1, q1 = 1, .5
+a2, q2 = 1.1, .5
+nu1, nu2 = fl.mathieu_nu(a1, q1), fl.mathieu_nu(a2, q2)
+c1, c2 = fl.mathieu_coefs(a1, q1, nu1, 3), fl.mathieu_coefs(a1, q1, nu1, 3)
+phi1, dphi1, phi2, dphi2 = fl.mathieu(a1, q1, t)
+phim1, dphim1, phim2, dphim2 = fl.mathieu(a2, q2, t)
 g = 1
-
-wc = 50
-t = np.linspace(0,10, 50)
-
 plt.clf()
-#sxx_sci = sigma_baja_nuevo(t, c_sci, nu_sci, g, wc)
-sxx_new = sigma_baja_nuevo(t, c, nu, g, wc)
-plt.plot(t, sxx_new, 'g')
+plt.plot(t, phi1, 'g-', t, phi2, 'b-')
 
 
 
