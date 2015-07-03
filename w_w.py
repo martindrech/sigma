@@ -23,7 +23,7 @@ def w2_w2(t, g, temp, nu1, c1, nu2 , c2, wc, phi1, phim1):
     if temp == 0:
         r =A*(R.R1_bajaT(wc, T, N, K, g, nu1, nu2)-R.R1_bajaT(0, T, N, K, g, nu1, nu2))
     else:
-        r =2*temp*A*(R.R1_altaT(wc, T, N, K, g, nu1, nu2, temp)-R.R1_altaT(0, T, N, K, g, nu1, nu2, temp))
+        r =2*temp*A*(R.R1_altaT(wc, T, N, K, g, nu1, nu2)-R.R1_altaT(0, T, N, K, g, nu1, nu2))
     
     r = np.sum(r, axis = (0,1))
     phies = phi1*phim1
@@ -41,9 +41,9 @@ def w1_w2(t, g, temp, nu1, c1, nu2 , c2, wc, phi1, phim1):
     A = si.B(c1, nu1)*si.C(c2, nu2)*A1*A2*A3
   
     if temp == 0:
-        r =A*np.exp(g*t)*(R.R2_bajaT(wc,T,N,M,K,g,nu1,nu2)-R.R2_bajaT(0,T,N,M,K,g,nu1,nu2))
+        r =A*(R.R2_bajaT(wc,T,N,M,K,g,nu1,nu2)-R.R2_bajaT(0,T,N,M,K,g,nu1,nu2))
     else:
-        r =2*temp*A*np.exp(g*t)*(R.R2_altaT(wc,T,N,M,K,g,nu1,nu2, temp)-R.R2_altaT(0,T,N,M,K,g,nu1,nu2, temp))
+        r =2*temp*A*(R.R2_altaT(wc,T,N,M,K,g,nu1,nu2)-R.R2_altaT(0,T,N,M,K,g,nu1,nu2))
     
     
     r = np.sum(r, axis = (0,1,2))
@@ -51,7 +51,7 @@ def w1_w2(t, g, temp, nu1, c1, nu2 , c2, wc, phi1, phim1):
     phies = phi1*phim1
 #    phies = 1
 #    impedir_peq(phies, 0.1)
-    return 1/phies * np.exp(-g*t/2)*(g/np.pi)  * r.real
+    return 1/phies * np.exp(g*t/2)*(g/np.pi)  * r.real
 
 def w1_w1(t, g, temp, nu1, c1, nu2 , c2, wc, phi1, phim1):
     """
@@ -65,7 +65,7 @@ def w1_w1(t, g, temp, nu1, c1, nu2 , c2, wc, phi1, phim1):
     if temp == 0:
         r =A*(R.R3_bajaT(wc,T,N,M,K,L,g,nu1,nu2)-R.R3_bajaT(0,T,N,M,K,L,g,nu1,nu2))
     else:
-        r =2*temp*A*(R.R3_altaT(wc,T,N,M,K,L,g,nu1,nu2, temp)-R.R3_altaT(0,T,N,M,K,L,g,nu1,nu2, temp))
+        r =2*temp*A*(R.R3_altaT(wc,T,N,M,K,L,g,nu1,nu2)-R.R3_altaT(0,T,N,M,K,L,g,nu1,nu2))
     
     r = np.sum(r, axis = (0,1,2,3))
     phies = phi1*phim1
