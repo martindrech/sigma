@@ -9,11 +9,9 @@ from __future__ import division
 import numpy as np
 import w_w as w_w
 import floquet as fl
-import time
-from matplotlib import pylab as plt
-import sigma as si
-#import fourier as fou
-#
+from sigma import deriv
+import pylab as plt
+
 def impedir_peq(arr, eps):
     mascara = np.abs(arr) < eps
     arr[mascara] = eps*np.sign(arr[mascara])
@@ -59,7 +57,7 @@ def a2(t, g,  nu1, c1, temp1, nu2, c2, temp2, wc, phi1, phim1):
     a21 = w1w2t1-w1mw2t1+w1w2mt1-w1mw2mt1 + w1w2t2+w1mw2t2-w1w2mt2-w1mw2mt2
     a22 = w1w2t1-w1w2mt1-w1mw2t1+w1mw2mt1 + w1w2t2+w1w2mt2+w1mw2t2+w1mw2mt2
     
-    return 1/2 * np.array([[a11, a12], [a21, a22]])
+    return  .5 * np.array([[a11, a12], [a21, a22]])
 
 def a3(t, g,  nu1, c1, temp1, nu2, c2, temp2, wc, phi1, phim1):
     """
@@ -104,9 +102,10 @@ def b(t, g, phi1, dphi1, phi2, dphi2, phim1, dphim1, phim2, dphim2):
     
     return b1d, b1c, b2d, b2c, b3d, b3c
     
-def cov(t, g, ca1, cq1, ca2, cq2, temp1, temp2, wc = 50, i = 5):
+def cov(t, g, ca1, cq1, ca2, cq2, temp1, temp2, wc = 50, i = 5, unpacked = False):
     """
-    Devuelve todos los valores medios para la matriz de covarianza. 
+    Devuelve todos los valores medios para la matriz de covarianza. Puede devolverlos como
+    la matriz armada o unpacked.
     """    
     nu1, nu2 = fl.mathieu_nu(ca1, cq1), fl.mathieu_nu(ca2, cq2)
     c1, c2 = fl.mathieu_coefs(ca1, cq1, nu1), fl.mathieu_coefs(ca2, cq2, nu2)
@@ -135,48 +134,126 @@ def cov(t, g, ca1, cq1, ca2, cq2, temp1, temp2, wc = 50, i = 5):
     
     for i in [x1x1, x2x2, x1x2, x1p1, x2p2, x1p2, x2p1, p1p1, p2p2, p1p2]:
         i[0] = i[1]
-    return x1x1, x2x2, x1x2, x1p1, x2p2, x1p2, x2p1, p1p1, p2p2, p1p2
-#    cov_matrix = np.array([[x1x1, x1p1, x1x2, x1p2], [x1p1, p1p1, x2p1, p1p2], [x1x2, x2p1, x2x2, x2p2], [x1p2, p1p2, x2p2, p2p2]])
-#    return cov_matrix
 
+    if unpacked:
+        return x1x1, x2x2, x1x2, x1p1, x2p2, x1p2, x2p1, p1p1, p2p2, p1p2
+    else:
+        cov_matrix = np.array([[x1x1, x1p1, x1x2, x1p2], [x1p1, p1p1, x2p1, p1p2], [x1x2, x2p1, x2x2, x2p2], [x1p2, p1p2, x2p2, p2p2]])
+        return cov_matrix
+
+def En(t, Mcov):
+    """
+    Negatividad logaritmica
+    """
+    var = np.array([])
+    for i, ti in enumerate(t):
+        
+        A = Mcov[:2, :2, i]
+        B = Mcov[2:, 2:, i]
+        C = Mcov[:2, 2:, i]
+        
+        delta = np.linalg.det(A)+np.linalg.det(B)-2*np.linalg.det(C)
+        dete = np.linalg.det(Mcov[:, :, i])
+        nmenos = np.sqrt((delta-np.sqrt(delta**2-4*dete))/2) 
+        
+        var = np.append(var, nmenos)
+    var = -np.log2(2*var)
+
+    var[var < 0] = 0
+
+    return var
     
+def heat(t, g, ca1, cq1, ca2, cq2, temp1, temp2, V, c, wc = 50, i = 3):
+    """
+    Devuelve dQ1/dt, dQ2/dt
+    """
+    Mcov = cov(t, g, ca1, cq1, ca2, cq2, temp1, temp2, wc, i)
+    x1x1, x2x2 = Mcov[0, 0, :], Mcov[2, 2, :] 
+    p1p1, p2p2 = Mcov[1, 1, :], Mcov[3, 3, :]
+    x1p2, x2p1 = Mcov[0, 3, :], Mcov[2, 1, :]
+    dQ1 = 1/2 * (deriv(p1p1, t)+V*deriv(x1x1, t))+c*x2p1 
+    dQ2 = 1/2 * (deriv(p2p2, t)+V*deriv(x2x2, t))+c*x1p2
+    
+    return dQ1, dQ2
+    
+    
+def discordia(t, Mcov):
+    """
+    Gaussian discord
+    """
+    def f(x):
+        return (x+1/2)*np.log2(x+1/2) + (x-1/2)*np.log2(x-1/2)
+        
+    discord = np.array([])
+    for i, ti in enumerate(t):
+        
+        alpha = Mcov[:2, :2, i]
+        beta = Mcov[2:, 2:, i]
+        gamma = Mcov[:2, 2:, i] 
+        
+        A = np.linalg.det(alpha)
+        B = np.linalg.det(beta)
+        C = np.linalg.det(gamma)
+        D = np.linalg.det(Mcov[:, :, i])
+        
+        delta = A+B+2*C
+        
+        nmenos = np.sqrt((delta-np.sqrt(delta**2-4*D))/2)
+        nmas =   np.sqrt((delta+np.sqrt(delta**2-4*D))/2)
+#        print nmenos
+        ge = (D-A*B)**2-(1/4+B) * C**2 * (A+4*D)
+#        print ge
+        if ge <= 0:
+            Emin =  (2*C**2+(-1/4+B)*(-A+4*D)+2*np.abs(C)*np.sqrt(C**2+(-1/4+B)*(-A+4*D))) / (4*(-1/4+B)**2)
+        else:
+            Emin = (A*B-C**2+D-np.sqrt(C**4+(-A*B+D)**2-2*C**2*(A*B+D))) / (2*B)
+        
+        dis_t = f(np.sqrt(B))-f(nmas)-f(nmenos)+f(np.sqrt(Emin))
+        discord = np.append(discord, dis_t)
+        
+    return discord
+  
 #start = time.time()  
-ca1, cq1, g = 2, 0.5, 1
-ca2, cq2 = 1., 0.5
+w = 1
+V = w**2
+c_1 = 0.5
+c_0 = 0
+g = .1
+ca1, cq1 = w**2-g**2/4+c_0-2*g, -.5*c_1
+ca2, cq2 = w**2-g**2/4-c_0-2*g, .5*c_1
 nu1, nu2 = fl.mathieu_nu(ca1, cq1), fl.mathieu_nu(ca2, cq2)
 #A1, A2 = fl.mathieu_coefs(ca1, cq1, nu1), fl.mathieu_coefs(ca2, cq2, nu2)
 i = 3
 #A1, A2 = A1[A1.size//2-i:A1.size//2+i+1], A2[A2.size//2-i:A2.size//2+i+1]
-t = np.linspace(0,10, 50)
+t = np.linspace(0,1, 30)
 #
 #
 wc = 50
-#
-T1, T2 = 28, 30
+T = 0
+T1, T2 = T, T
 #
 #
 
-covarianzas = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i)
-x1x1, x2x2, x1x2, x1p1, x2p2, x1p2, x2p1, p1p1, p2p2, p1p2 = covarianzas
-##t, x1x1, p1p1, x1p1 = t[1:], x1x1[1:], p1p1[1:], x1p1[1:]
-##plt.figure(2)
+#covarianzas = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i)
+temps = np.arange(0, 10, 1)
+dis_vec, neg_vec = np.array([]), np.array([])
+for T in temps: 
+    covarianzas = cov(t, g, ca1, cq1, ca2, cq2, T, T, wc, i)
+    dis = np.average(discordia(t, covarianzas))
+    neg = np.average(En(t, covarianzas))
+    dis_vec = np.append(dis_vec, dis)
+    neg_vec = np.append(neg_vec, neg)
+    print T
+    
 plt.clf()
-##plt.plot(t, x2p1, 'bo-', t, x1p2, 'go-')
-##plt.plot(t, si.deriv(x1x1, t)/2, 'b-o')
-plt.plot(t, p1p1, 'go-')
-plt.plot(t, p2p2, 'bo-')
-#
-#plt.plot(t, p1p2, 'go-')
-#plt.plot(t, p1p1, 'r-o')
-#plt.plot(t, p2p2, 'b-')
-#
-##top = 10
-##plt.axis([0, 5, -50, 50])
-##plt.plot(t, 1000*x1x1, 'g-o')
-#phi1, dphi1, phi2, dphi2 = fl.mathieu(ca1, cq1, t)    
-#phim1, dphim1, phim2, dphim2 = fl.mathieu(ca2, cq2, t)
-#plt.plot(t, 1000*(phi1), 'b')
-#plt.plot(t, 1000*(phim1), 'r')
-#plt.grid()
-##
+plt.plot(temps, dis_vec, 'ob')
+plt.plot(temps, neg_vec, 'or')
+print np.abs(np.imag(nu2))/g
+    
+#dis = discordia(t, covarianzas)
+#neg = En(t, covarianzas)
+#plt.clf()
+#plt.plot(t, dis, '-o')
+#plt.axis([0, np.max(t), np.average(neg)-1, np.average(neg)+1])
+#print np.abs(np.imag(nu2))/g
 print 'done'
