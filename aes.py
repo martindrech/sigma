@@ -163,11 +163,32 @@ def En(t, Mcov):
 
     return var
     
-def heat(t, g, ca1, cq1, ca2, cq2, temp1, temp2, V, c, wc = 50, i = 3):
+
+def n_menos(t, Mcov):
+    """
+    Menor autovalor simplectico
+    """
+    var = np.array([])
+    for i, ti in enumerate(t):
+        
+        A = Mcov[:2, :2, i]
+        B = Mcov[2:, 2:, i]
+        C = Mcov[:2, 2:, i]
+        
+        delta = np.linalg.det(A)+np.linalg.det(B)+2*np.linalg.det(C)
+        dete = np.linalg.det(Mcov[:, :, i])
+        nmenos = np.sqrt((delta-np.sqrt(delta**2-4*dete))/2) 
+        
+        var = np.append(var, nmenos)
+    
+    return var
+
+
+def heat(t, Mcov, c, V):
     """
     Devuelve dQ1/dt, dQ2/dt
     """
-    Mcov = cov(t, g, ca1, cq1, ca2, cq2, temp1, temp2, wc, i)
+#    Mcov = cov(t, g, ca1, cq1, ca2, cq2, temp1, temp2, wc, i)
     x1x1, x2x2 = Mcov[0, 0, :], Mcov[2, 2, :] 
     p1p1, p2p2 = Mcov[1, 1, :], Mcov[3, 3, :]
     x1p2, x2p1 = Mcov[0, 3, :], Mcov[2, 1, :]
@@ -182,7 +203,7 @@ def discordia(t, Mcov):
     Gaussian discord
     """
     def f(x):
-        return (x+1/2)*np.log2(x+1/2) + (x-1/2)*np.log2(x-1/2)
+        return (x+1/2)*np.log2(x+1/2) - (x-1/2)*np.log2(x-1/2)
         
     discord = np.array([])
     for i, ti in enumerate(t):
@@ -200,7 +221,7 @@ def discordia(t, Mcov):
         
         nmenos = np.sqrt((delta-np.sqrt(delta**2-4*D))/2)
         nmas =   np.sqrt((delta+np.sqrt(delta**2-4*D))/2)
-#        print nmenos
+        print nmenos
         ge = (D-A*B)**2-(1/4+B) * C**2 * (A+4*D)
 #        print ge
         if ge <= 0:
@@ -210,50 +231,45 @@ def discordia(t, Mcov):
         
         dis_t = f(np.sqrt(B))-f(nmas)-f(nmenos)+f(np.sqrt(Emin))
         discord = np.append(discord, dis_t)
-        
+    
     return discord
-  
+
 #start = time.time()  
 w = 1
 V = w**2
 c_1 = 0.5
 c_0 = 0
-g = .1
+g = .0001
 ca1, cq1 = w**2-g**2/4+c_0-2*g, -.5*c_1
 ca2, cq2 = w**2-g**2/4-c_0-2*g, .5*c_1
 nu1, nu2 = fl.mathieu_nu(ca1, cq1), fl.mathieu_nu(ca2, cq2)
 #A1, A2 = fl.mathieu_coefs(ca1, cq1, nu1), fl.mathieu_coefs(ca2, cq2, nu2)
 i = 3
 #A1, A2 = A1[A1.size//2-i:A1.size//2+i+1], A2[A2.size//2-i:A2.size//2+i+1]
-t = np.linspace(0,1, 30)
+t = np.linspace(0,5, 30)
 #
 #
 wc = 50
 T = 0
-T1, T2 = T, T
+T1, T2 = T, 30
 #
 #
 
-#covarianzas = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i)
-temps = np.arange(0, 10, 1)
-dis_vec, neg_vec = np.array([]), np.array([])
-for T in temps: 
-    covarianzas = cov(t, g, ca1, cq1, ca2, cq2, T, T, wc, i)
-    dis = np.average(discordia(t, covarianzas))
-    neg = np.average(En(t, covarianzas))
-    dis_vec = np.append(dis_vec, dis)
-    neg_vec = np.append(neg_vec, neg)
-    print T
-    
-plt.clf()
-plt.plot(temps, dis_vec, 'ob')
-plt.plot(temps, neg_vec, 'or')
-print np.abs(np.imag(nu2))/g
-    
-#dis = discordia(t, covarianzas)
-#neg = En(t, covarianzas)
+covarianzas = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i)
+
+
+print n_menos(t, covarianzas) < .5
 #plt.clf()
-#plt.plot(t, dis, '-o')
-#plt.axis([0, np.max(t), np.average(neg)-1, np.average(neg)+1])
-#print np.abs(np.imag(nu2))/g
+#plt.plot(t, covarianzas[0, 0, :])
+#plt.axis([0, np.max(t), 0, 1])1
+
+dis = discordia(t, covarianzas)
+neg = En(t, covarianzas)
+plt.clf()
+plt.plot(t, dis,'-b', label = 'discord', linewidth = 3)
+plt.plot(t, neg,'-g', label = 'En', linewidth = 3)
+plt.axis([0, 2, -1, 3])
+plt.legend()
+
+print 'Estable: ', nu1.imag <= g/2, nu2.imag <= g/2
 print 'done'
