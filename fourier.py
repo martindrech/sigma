@@ -22,7 +22,7 @@ def plot_ft(t, x):
     plt.plot(freqs, np.abs(f), 'o')
     plt.show()
     
-    return 0
+    return freqs[np.argmax(np.abs(f[1:]))+1]
     
 def fourier_series_coeff_numpy(f, T, N, return_complex=False):
     """Calculates the first 2*N+1 Fourier series coeff. of a periodic function.

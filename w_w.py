@@ -8,6 +8,7 @@ from __future__ import division
 import numpy as np
 import sigma as si
 import erres as R
+
 def impedir_peq(arr, eps):
     mascara = np.abs(arr) < eps
     arr[mascara] = eps*np.sign(arr[mascara])
@@ -49,6 +50,7 @@ def w1_w2(t, g, temp, nu1, c1, nu2 , c2, wc, phi1, phim1):
     r = np.sum(r, axis = (0,1,2))
 
     phies = phi1*phim1
+#    print phies
 #    phies = 1
 #    impedir_peq(phies, 0.1)
     return 1/phies * np.exp(g*t/2)*(g/np.pi)  * r.real
@@ -69,7 +71,7 @@ def w1_w1(t, g, temp, nu1, c1, nu2 , c2, wc, phi1, phim1):
     
     r = np.sum(r, axis = (0,1,2,3))
     phies = phi1*phim1
-    
+#    impedir_peq(phies, 0.1)
     return 1/phies * np.exp(g*t)*(g/np.pi) *  r.real
     
 ###############################################################################

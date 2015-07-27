@@ -11,6 +11,7 @@ import w_w as w_w
 import floquet as fl
 from sigma import deriv
 import pylab as plt
+from fourier import plot_ft as fft
 
 def impedir_peq(arr, eps):
     mascara = np.abs(arr) < eps
@@ -114,6 +115,8 @@ def cov(t, g, ca1, cq1, ca2, cq2, temp1, temp2, wc = 50, i = 5, unpacked = False
     phi1, dphi1, phi2, dphi2 = fl.mathieu(ca1, cq1, t)    
     phim1, dphim1, phim2, dphim2 = fl.mathieu(ca2, cq2, t)
     
+#    impedir_peq(phi1, .01)
+#    impedir_peq(phim1, .01)
 
     
     Ma1 = a1(t, g,  nu1, c1, temp1, nu2, c2, temp2, wc, phi1, phim1)
@@ -235,41 +238,50 @@ def discordia(t, Mcov):
     return discord
 
 #start = time.time()  
-w = 1
-V = w**2
-c_1 = 0.5
-c_0 = 0
-g = .0001
-ca1, cq1 = w**2-g**2/4+c_0-2*g, -.5*c_1
-ca2, cq2 = w**2-g**2/4-c_0-2*g, .5*c_1
+w0 = 1
+wd = 2.1*w0
+c_1 = 0.5*w0
+c_0 = 0*w0
+g = .3*w0
+ca1, cq1 = (4/wd**2)*(w0**2-g**2/4+c_0-2*g), -(2/wd**2)*c_1
+ca2, cq2 = (4/wd**2)*(w0**2-g**2/4-c_0-2*g), (2/wd**2)*c_1
 nu1, nu2 = fl.mathieu_nu(ca1, cq1), fl.mathieu_nu(ca2, cq2)
-#A1, A2 = fl.mathieu_coefs(ca1, cq1, nu1), fl.mathieu_coefs(ca2, cq2, nu2)
+#A1, 0A2 = fl.mathieu_coefs(ca1, cq1, nu1), fl.mathieu_coefs(ca2, cq2, nu2)
 i = 3
 #A1, A2 = A1[A1.size//2-i:A1.size//2+i+1], A2[A2.size//2-i:A2.size//2+i+1]
-t = np.linspace(0,5, 30)
+t = np.linspace(0,50, 500)
 #
 #
 wc = 50
-T = 0
-T1, T2 = T, 30
+T = 50
+T1, T2 = 20, 25
 #
-#
+c = c_0+c_1*np.cos(2*t)
+V = w0**2-2*g
+#covarianzas = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i)
+x1x1, x2x2, x1x2, x1p1, x2p2, x1p2, x2p1, p1p1, p2p2, p1p2 = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i, unpacked=True)
+Mcov = np.array([[x1x1, x1p1, x1x2, x1p2], [x1p1, p1p1, x2p1, p1p2], [x1x2, x2p1, x2x2, x2p2], [x1p2, p1p2, x2p2, p2p2]])
+heat1, heat2 = heat(t, Mcov, c, V)  
+t = 2/wd * t
 
-covarianzas = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i)
-
-
-print n_menos(t, covarianzas) < .5
-#plt.clf()
-#plt.plot(t, covarianzas[0, 0, :])
-#plt.axis([0, np.max(t), 0, 1])1
-
-dis = discordia(t, covarianzas)
-neg = En(t, covarianzas)
 plt.clf()
-plt.plot(t, dis,'-b', label = 'discord', linewidth = 3)
-plt.plot(t, neg,'-g', label = 'En', linewidth = 3)
-plt.axis([0, 2, -1, 3])
-plt.legend()
+#plt.subplot(1, 3, 1)
+#plt.plot(t, x1x1, 'bo-', t, x2x2, 'go-', t, x1x2, 'ro-')
+plt.subplot(1, 2, 1)
+plt.plot(t, p1p1, 'bo-', t, p2p2, 'go-', t, p1p2, 'ro-')
+plt.subplot(1, 2, 2)
+plt.plot(t, x1p2, 'ro-', t, x2p1, 'mo-')
+#plt.plot(t, np.average(heat1)*np.ones(len(t)), 'o-b', t, np.average(heat2)*np.ones(len(t)), 'o-r')
+
+#
+#dis = discordia(t, covarianzas)
+#neg = En(t, covarianzas)
+#plt.clf()
+#plt.plot(t, dis,'-xb', label = 'discord', linewidth = 3)
+#plt.plot(t, neg,'-g', label = 'En', linewidth = 3)
+#plt.axis([0, np.max(t), -1, .5])
+#plt.legend()
 
 print 'Estable: ', nu1.imag <= g/2, nu2.imag <= g/2
+#print 'Cotas para T: ', np.abs(nu1.imag)/g, np.abs(nu2.imag)/g
 print 'done'
