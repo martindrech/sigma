@@ -236,7 +236,7 @@ def discordia(t, Mcov):
         discord = np.append(discord, dis_t)
     
     return discord
-
+"""
 #start = time.time()  
 w0 = 1
 wd = 2.1*w0
@@ -285,3 +285,4 @@ plt.plot(t, x1p2, 'ro-', t, x2p1, 'mo-')
 print 'Estable: ', nu1.imag <= g/2, nu2.imag <= g/2
 #print 'Cotas para T: ', np.abs(nu1.imag)/g, np.abs(nu2.imag)/g
 print 'done'
+"""
