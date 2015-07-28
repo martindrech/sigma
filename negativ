@@ -1,0 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jun 28 19:00:54 2015
+
+@author: martin
+"""
+
+from __future__ import division
+import numpy as np
+import w_w as w_w
+import floquet as fl
+import time
+from matplotlib import pylab as plt
+import sigma as si
