@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 """
 Created on Mon Jun  8 18:42:33 2015
 
@@ -188,7 +188,7 @@ def n_menos(t, Mcov):
     return var
 
 
-def heat(t, Mcov, c, V):
+def heat(t, Mcov, c, V, mean = True):
     """
     Devuelve dQ1/dt, dQ2/dt
     """
@@ -198,9 +198,10 @@ def heat(t, Mcov, c, V):
     x1p2, x2p1 = Mcov[0, 3, :], Mcov[2, 1, :]
     dQ1 = 1/2 * (deriv(p1p1, t)+V*deriv(x1x1, t))+c*x2p1 
     dQ2 = 1/2 * (deriv(p2p2, t)+V*deriv(x2x2, t))+c*x1p2
-    
-    return dQ1, dQ2
-    
+    if mean:
+        return np.median(dQ1), np.median(dQ2)
+    else:
+        return dQ1, dQ2
     
 def discordia(t, Mcov):
     """
@@ -225,7 +226,7 @@ def discordia(t, Mcov):
         
         nmenos = np.sqrt((delta-np.sqrt(delta**2-4*D))/2)
         nmas =   np.sqrt((delta+np.sqrt(delta**2-4*D))/2)
-        print nmenos
+#        print nmenos
         ge = (D-A*B)**2-(1/4+B) * C**2 * (A+4*D)
 #        print ge
         if ge <= 0:
@@ -238,41 +239,77 @@ def discordia(t, Mcov):
     
     return discord
 """
-#start = time.time()  
-<<<<<<< Updated upstream
+
 w0 = 1
-wd = 2.1*w0
-c_1 = 0.5*w0
+wd = 2*w0
+c_1 = 0.1*w0
 c_0 = 0*w0
-g = .3*w0
+g = .0001*w0
 ca1, cq1 = (4/wd**2)*(w0**2-g**2/4+c_0-2*g), -(2/wd**2)*c_1
 ca2, cq2 = (4/wd**2)*(w0**2-g**2/4-c_0-2*g), (2/wd**2)*c_1
 nu1, nu2 = fl.mathieu_nu(ca1, cq1), fl.mathieu_nu(ca2, cq2)
 #A1, 0A2 = fl.mathieu_coefs(ca1, cq1, nu1), fl.mathieu_coefs(ca2, cq2, nu2)
-i = 3
+i = 2
 #A1, A2 = A1[A1.size//2-i:A1.size//2+i+1], A2[A2.size//2-i:A2.size//2+i+1]
-t = np.linspace(0,50, 500)
+t = np.linspace(0, 3, 50)
 #
 #
 wc = 50
-T = 50
-T1, T2 = 20, 25
+T = 100
+T1, T2 = 40, 200
 #
-c = c_0+c_1*np.cos(2*t)
+c = c_0+c_1*np.cos(wd*t)
 V = w0**2-2*g
 #covarianzas = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i)
-x1x1, x2x2, x1x2, x1p1, x2p2, x1p2, x2p1, p1p1, p2p2, p1p2 = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i, unpacked=True)
-Mcov = np.array([[x1x1, x1p1, x1x2, x1p2], [x1p1, p1p1, x2p1, p1p2], [x1x2, x2p1, x2x2, x2p2], [x1p2, p1p2, x2p2, p2p2]])
-heat1, heat2 = heat(t, Mcov, c, V)  
-t = 2/wd * t
+#x1x1, x2x2, x1x2, x1p1, x2p2, x1p2, x2p1, p1p1, p2p2, p1p2 = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i, unpacked=True)
+#Mcov = np.array([[x1x1, x1p1, x1x2, x1p2], [x1p1, p1p1, x2p1, p1p2], [x1x2, x2p1, x2x2, x2p2], [x1p2, p1p2, x2p2, p2p2]])
+#heat1, heat2 = heat(t, Mcov, c, V, False)
 
 plt.clf()
+temps = np.arange(0, 20, 5)
+#Q1, Q2 = np.array([]), np.array([]) 
+for T in temps:
+    T1, T2 = 10, T
+    x1x1, x2x2, x1x2, x1p1, x2p2, x1p2, x2p1, p1p1, p2p2, p1p2 = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i, unpacked=True)
+    Mcov = np.array([[x1x1, x1p1, x1x2, x1p2], [x1p1, p1p1, x2p1, p1p2], [x1x2, x2p1, x2x2, x2p2], [x1p2, p1p2, x2p2, p2p2]])
+    plt.plot(t, discordia(t, Mcov), label = str(T))
+#    heat1, heat2 = heat(t, Mcov, c, V)
+#    Q1 = np.append(Q1, heat1)
+#    Q2 = np.append(Q2, heat2)
+    
+    print T
+plt.legend()
+#plt.clf()
+#plt.plot(temps, Q2+Q1, 'b')
+#plt.plot(temps, Q2, 'r')    
+
+#plt.clf()
+#Q1, Q2 = heat(t, Mcov, c, V, False)
+
+#plt.axis([0, 5, -100, 100])
+#t = 2/wd * t
+#neg = En(t, Mcov)
+#dis = discordia(t, Mcov)
+
+
+#plt.clf()
+#plt.plot(t, dis, 'o-')
+#plt.plot(t, np.median(dis)*np.ones(len(t)))
+
+
+
+
+
+
+
+
+#plt.clf()
 #plt.subplot(1, 3, 1)
 #plt.plot(t, x1x1, 'bo-', t, x2x2, 'go-', t, x1x2, 'ro-')
-plt.subplot(1, 2, 1)
-plt.plot(t, p1p1, 'bo-', t, p2p2, 'go-', t, p1p2, 'ro-')
-plt.subplot(1, 2, 2)
-plt.plot(t, x1p2, 'ro-', t, x2p1, 'mo-')
+#plt.subplot(1, 2, 1)
+#plt.plot(t, p1p1, 'bo-', t, p2p2, 'go-', t, p1p2, 'ro-')
+#plt.subplot(1, 2, 2)
+#plt.plot(t, x1p2, 'ro-', t, x2p1, 'mo-')
 #plt.plot(t, np.average(heat1)*np.ones(len(t)), 'o-b', t, np.average(heat2)*np.ones(len(t)), 'o-r')
 
 #
@@ -284,53 +321,13 @@ plt.plot(t, x1p2, 'ro-', t, x2p1, 'mo-')
 #plt.axis([0, np.max(t), -1, .5])
 #plt.legend()
 
-print 'Estable: ', nu1.imag <= g/2, nu2.imag <= g/2
-#print 'Cotas para T: ', np.abs(nu1.imag)/g, np.abs(nu2.imag)/g
-=======
-w = 1
+#print 'Estable: ', nu1.imag <= g/2, nu2.imag <= g/2
 
-c_1 = 0
-c_0 = 0.5
-g = .1
-
-
-ca1, cq1 = w**2-g**2/4+c_0-2*g, -.5*c_1
-ca2, cq2 = w**2-g**2/4-c_0-2*g, .5*c_1
-nu1, nu2 = fl.mathieu_nu(ca1, cq1), fl.mathieu_nu(ca2, cq2)
-#A1, A2 = fl.mathieu_coefs(ca1, cq1, nu1), fl.mathieu_coefs(ca2, cq2, nu2)
-i = 1
-#A1, A2 = A1[A1.size//2-i:A1.size//2+i+1], A2[A2.size//2-i:A2.size//2+i+1]
-t = np.linspace(0,1, 50)
-#
-#
-wc = 50
-T = 30
-T1, T2 = 0, T+2
-#
-#
-
-covarianzas = cov(t, g, ca1, cq1, ca2, cq2, T1, T2, wc, i)
-c = c_0 + c_1 * np.cos(2*t)
-V = w**2-2*g
-heat1, heat2 = heat(t, covarianzas, c, V)
-plt.clf()
-plt.plot(t, heat1, 'ob-', t, heat2, 'or-')
-
-#print n_menos(t, covarianzas) < .5
-#plt.clf()
-#plt.plot(t, covarianzas[1, 1, :], 'o')
-#plt.axis([0, 3, 0, 5])
-
-#dis = discordia(t, covarianzas)
-#neg = En(t, covarianzas)
-#plt.clf()
-#plt.plot(t, dis,'-b', label = 'discord', linewidth = 3)
-#plt.plot(t, neg,'-g', label = 'En', linewidth = 3)
-#plt.axis([0, 5, -1, 1])
 #plt.legend()
 
 print 'Estable: ', nu1.imag <= g/2, nu2.imag <= g/2
-#print 'Limite clasico: ', np.abs(nu1.imag/g)
->>>>>>> Stashed changes
+print 'Limite clasico: ', np.abs(nu1.imag/g)
+
 print 'done'
+
 """
